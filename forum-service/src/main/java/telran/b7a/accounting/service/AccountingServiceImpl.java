@@ -1,5 +1,6 @@
 package telran.b7a.accounting.service;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,15 +34,17 @@ public class AccountingServiceImpl implements AccountingService {
 			throw new UserExistsException(registerUserDto.getLogin());
 		}
 		UserAccount userAccount = modelMapper.map(registerUserDto, UserAccount.class);
-		userAccount.addrole("user");
+		userAccount.addRole("USER");
+		String password = BCrypt.hashpw(registerUserDto.getPassword(), BCrypt.gensalt());
+		userAccount.setPassword(password);		
 		accountingRepository.save(userAccount);
 		return modelMapper.map(userAccount, ResponseUserDto.class);
 	}
 
 	@Override
-	public ResponseUserDto loginUser(LoginUserDto loginUserDto) {
-		UserAccount userAccount = accountingRepository.findById(loginUserDto.getLogin())
-				                                         .orElseThrow(() -> new UserNotFoundException(loginUserDto.getLogin()));
+	public ResponseUserDto loginUser(String login) {
+		UserAccount userAccount = accountingRepository.findById(login)
+				                                         .orElseThrow(() -> new UserNotFoundException(login));
 		return modelMapper.map(userAccount, ResponseUserDto.class);
 	}
 
@@ -74,7 +77,7 @@ public class AccountingServiceImpl implements AccountingService {
 		UserAccount userAccount = accountingRepository.findById(login)
                                                          .orElseThrow(() -> new UserNotFoundException(login)); 
 		if ( role != null) {
-		     userAccount.addrole(role);
+		     userAccount.addRole(role.toUpperCase());
 		}
 		accountingRepository.save(userAccount);
 		return modelMapper.map(userAccount, ResponseRoleUserDto.class);
@@ -85,7 +88,7 @@ public class AccountingServiceImpl implements AccountingService {
 		UserAccount userAccount = accountingRepository.findById(login)
                                                          .orElseThrow(() -> new UserNotFoundException(login)); 
 		if ( role != null) {
-		     userAccount.removeRole(role);
+		     userAccount.removeRole(role.toUpperCase());
 		}
 		accountingRepository.save(userAccount);
 		return modelMapper.map(userAccount, ResponseRoleUserDto.class);
@@ -96,8 +99,8 @@ public class AccountingServiceImpl implements AccountingService {
 		UserAccount userAccount = accountingRepository.findById(loginUserDto.getLogin())
                                                          .orElseThrow(() -> new UserNotFoundException(loginUserDto.getLogin()));
 		if ( loginUserDto.getPassword() != null) {
-		     userAccount.setPassword(loginUserDto.getPassword());
-		}
+			userAccount.setPassword(BCrypt.hashpw(loginUserDto.getPassword(), BCrypt.gensalt()));
+		}		
 		accountingRepository.save(userAccount);
 	}	
 

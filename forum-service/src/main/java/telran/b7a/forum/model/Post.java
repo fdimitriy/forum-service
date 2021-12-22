@@ -19,7 +19,7 @@ import lombok.ToString;
 @Getter
 @EqualsAndHashCode(of = { "id" })
 @ToString
-@Document(collection = "posts")
+@Document(collection = "posts") //с таким именем коллекция сохранится в БД MongoDB
 public class Post {
 	@Id
 	String id;

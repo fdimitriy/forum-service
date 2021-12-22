@@ -10,7 +10,8 @@ public interface AccountingService {
 	
 	ResponseUserDto registerUser(RegisterUserDto registerUserDto);
 	
-	ResponseUserDto loginUser(LoginUserDto loginUserDto);
+	ResponseUserDto loginUser(String login);
+//	ResponseUserDto loginUser(LoginUserDto loginUserDto);
 	
 	ResponseUserDto deleteUser(String login);
 	

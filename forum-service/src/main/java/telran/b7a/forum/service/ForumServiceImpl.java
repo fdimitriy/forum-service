@@ -5,9 +5,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import telran.b7a.forum.dao.ForumMongoRepository;
 import telran.b7a.forum.dto.DatePeriodDto;
 import telran.b7a.forum.dto.MessageDto;
@@ -16,10 +19,13 @@ import telran.b7a.forum.dto.PostDto;
 import telran.b7a.forum.dto.exceptions.PostNotFoundException;
 import telran.b7a.forum.model.Comment;
 import telran.b7a.forum.model.Post;
+import telran.b7a.forum.service.logging.PostLogger;
 
 @Service
+//@Slf4j // аннотация для ломбока подключить логгирование slf4j, по умолчанию создаст переменную log
 public class ForumServiceImpl implements ForumService {
 
+//	static final Logger log = LoggerFactory.getLogger(ForumServiceImpl.class);  // подключаем систему логгирования slf4j
 	ForumMongoRepository forumRepository;
 	ModelMapper modelMapper;
 
@@ -53,6 +59,7 @@ public class ForumServiceImpl implements ForumService {
 	}
 
 	@Override
+	@PostLogger
 	public PostDto updatePost(String id, NewPostDto newPostDto) {
 		Post post = forumRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
 		String content = newPostDto.getContent();
@@ -72,13 +79,15 @@ public class ForumServiceImpl implements ForumService {
 	}
 
 	@Override
+	@PostLogger
 	public void addLikeToPost(String id) {
 		Post post = forumRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
 		post.addLike();
+		forumRepository.save(post);
 	}
 
 	@Override
-	public PostDto addCommentToPost(String id, String author, MessageDto messageDto) {
+	public PostDto addCommentToPost(String id, String author, MessageDto messageDto) {		
 		Post post = forumRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
 		String message = messageDto.getMessage();
 		Comment comment = new Comment(author, message);
@@ -88,10 +97,17 @@ public class ForumServiceImpl implements ForumService {
 	}
 
 	@Override
-	public List<PostDto> findPostsByAuthor(String author) {
-		return forumRepository.findByAuthor(author)
-				                    .map(p -> modelMapper.map(p, PostDto.class))
-				                    .collect(Collectors.toList());		
+	public List<PostDto> findPostsByAuthor(String author) {   // подключили логгирование с выводом в консоль по умолчанию
+//		long t1 = System.currentTimeMillis();
+		
+		List<PostDto> res = forumRepository.findByAuthor(author)
+                .map(p -> modelMapper.map(p, PostDto.class))
+                .collect(Collectors.toList());
+		
+//		long t2 = System.currentTimeMillis();
+//		log.info("method - findPostsByAuthor(String author), duration = {}", ( t2-t1 ));
+		
+		return res;	
 	}
 
 	@Override
