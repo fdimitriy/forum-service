@@ -11,28 +11,13 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
-import telran.b7a.accounting.dao.AccountingRepository;
-import telran.b7a.security.SecurityContext;
-import telran.b7a.security.UserProfile;
-
 @Service
 @Order(30)
-public class OwnerFilter implements Filter {
-	
-	AccountingRepository repository;
-	SecurityContext securityContext;	
-	
-    @Autowired
-	public OwnerFilter(AccountingRepository repository, SecurityContext securityContext) {
-		super();
-		this.repository = repository;
-		this.securityContext = securityContext;
-	}
-
+public class OwnerLoginFilter implements Filter {
+	   
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
 			throws IOException, ServletException {
@@ -42,8 +27,8 @@ public class OwnerFilter implements Filter {
 	    
 	    String servletPath = request.getServletPath();
 	    
-	    System.out.println("1 " +request.getHeaderNames());
-	    System.out.println("2 " +request.getServletPath());
+	    System.out.println("Log for Me: request.getHeaderNames - " + request.getHeaderNames());
+	    System.out.println("Log for Me: request.getServletPath -" + request.getServletPath());
 	    
 	    if(checkEndPoints(request.getServletPath(), request.getMethod())) {
 	    	Principal principal = request.getUserPrincipal();

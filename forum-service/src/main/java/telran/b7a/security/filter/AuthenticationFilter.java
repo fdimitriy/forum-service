@@ -13,7 +13,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,11 +46,11 @@ public class AuthenticationFilter implements Filter {
 			throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
-		//TODO
+		
 		System.out.println(request.getMethod());
 		System.out.println(request.getServletPath());
 		
-		System.out.println(request.getSession().getId()); // смотрим id сессии
+		System.out.println(request.getSession().getId()); // смотрим id сессии, после выполнения постман создаст куки у себя, для повторной авторизации по ним
 		if (checkEndPoints(request.getServletPath(), request.getMethod())) {
 			String token = request.getHeader("Authorization");
 			String sessionId = request.getSession().getId();
@@ -84,8 +83,7 @@ public class AuthenticationFilter implements Filter {
 					                     .password(userAccount.getPassword())
 					                     .roles(userAccount.getRoles())
 					                     .build();
-			securityContext.addUser(user);
-			
+			securityContext.addUser(user);			
 		}
 		chain.doFilter(request, response);	// только после выполнения предыдущих условий запрос пройдет дальше	
 
